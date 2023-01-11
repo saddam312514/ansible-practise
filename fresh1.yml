@@ -1,0 +1,46 @@
+
+
+---
+- name: Install httpd & configure
+  hosts: db
+  become: yes
+  vars:
+    web_package: "httpd"
+    firewall_package: "firewalld"
+    web_service: "httpd"
+    firewall_service: "firewalld"
+  tasks:
+    - name: Install {{ web_package }} & {{ firewall_package }}
+      yum: 
+        name:
+          - "{{ web_package }}"
+          - "{{ firewall_package }}"
+        state: latest
+    - name: enabled and start httpd
+      service: 
+        name: "{{ web_service }}"
+        enabled: true
+        state: started
+    - name: Enable and start firewalld
+      service:
+        name: "{{ firewall_service }}"
+        enabled: true
+        state: started 
+    - name: Open Firewall ports
+      firewalld:
+        service: http
+        permanent: true
+        state: enabled
+        immediate: yes
+    - name: Copy html content
+      copy:
+        content: "Welcome to our website <br>(This is deploy useing ansible)"
+        dest: /var/www/html/index.html
+- name: Test and verify website
+  hosts: localhost
+  become: no
+  tasks:
+    - name: Connect to the webserver
+      uri: 
+        url: http://192.168.1.13
+        status_code: 200
