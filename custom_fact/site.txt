@@ -1,0 +1,20 @@
+  952  git add .;git commit -m "register variable";git push
+  953  mkdir ansible_facts
+  954  cd ansible_facts/
+  955  clear
+  956  vim site.yaml
+  957  ansible-playbook site.yaml 
+  958  vim site.yaml
+  959  ansible-playbook site.yaml 
+  960  ansible node1 -m setup
+  961  clear
+  962  vim site.yaml 
+  963  ansible-playbook site.yaml 
+  964  cd ..
+  965  git add .;git commit -m 'ansible facts';git push
+  966  mkdir custom_fact
+  967  cd custom_fact/
+  968  ansible node1 -m setup -a 'filter=ansible_local'
+  969  history 20
+  970  clear
+  971  history 20 > site.txt
