@@ -2,7 +2,7 @@
 
 ---
 - name: Install httpd & configure
-  hosts: "{{ db }}"
+  hosts: "{{ nodes }}"
   become: yes
   tasks:
     - name: Install {{ web_package }} & {{ firewall_package }}
@@ -29,7 +29,7 @@
         immediate: yes
     - name: Copy html content
       copy:
-        content: "Welcome to our website <br>(This is deploy useing ansible)"
+        content: "Welcome to our website <br>(This is our first content of nodes)"
         dest: /var/www/html/index.html
 - name: Test and verify website
   hosts: localhost
