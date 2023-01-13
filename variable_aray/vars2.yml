@@ -1,0 +1,11 @@
+users:
+   choya1:
+     firstname: karina
+     lastname: iruhcok
+     designation: Admin
+     location: BD
+   toya:
+     firstname: toya
+     lastname: toya2
+     designation: operator
+     location: Bd
