@@ -1,0 +1,11 @@
+---
+- name: Run a Command
+  hosts: nodes
+  become: true
+  tasks: 
+    - name: Check Uptime
+      shell: 'uptime'
+      register: shell_output
+    - name: Print the out
+      debug:
+        msg: "{{ shell_output.stdout_lines}}"
