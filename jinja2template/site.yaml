@@ -1,0 +1,10 @@
+---
+- name: Using jinja2
+  hosts: db
+  vars:
+    system_admin_email: admin@lab.com
+  tasks:
+    - name: Deploy motd
+      template:
+        dest: /etc/motd
+        src: motd.j2
