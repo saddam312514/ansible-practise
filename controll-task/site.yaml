@@ -1,0 +1,27 @@
+---
+- name:
+  hosts: nodes
+  become: true
+  vars:
+    install_package: false
+
+    #install_package: true
+  tasks:
+    - name: install package
+      yum:
+        name:
+          - httpd
+          - firewalld
+        state: present
+      #when: install_package
+      
+      when: not install_package
+    - name: Enabale service
+      service:
+        name: "{{ item }}"
+        state: started
+        enabled: true
+      loop:
+        - httpd
+        - firewalld
+

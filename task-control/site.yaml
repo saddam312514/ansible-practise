@@ -1,0 +1,19 @@
+---
+- name:
+  hosts: nodes
+  tasks:
+    - name: install package
+      yum:
+        name:
+          - httpd
+          - firewalld
+        state: present
+    - name: Enabale service
+      service:
+        name: "{{ item }}"
+        state: started
+        enabled: true
+      loop:
+        - httpd
+        - firewalld
+
