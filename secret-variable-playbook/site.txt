@@ -1,0 +1,20 @@
+ 1011  ansible-playbook site.yaml 
+ 1012  ansible-playbook site.yaml  --vault-id @promt
+ 1013  ansible-playbook site.yaml  --vault-id @prompt
+ 1014  vim site.yaml 
+ 1015  ansible-playbook site.yaml  --vault-id @prompt
+ 1016  ll
+ 1017  vim user-passwd.yaml 
+ 1018  ansible-vault decrypt user-passwd.yaml 
+ 1019  vim user-passwd.yaml 
+ 1020  ansible-vault encrypt user-passwd.yaml 
+ 1021  clear
+ 1022  vim .myvault
+ 1023  ansible-playbook site.yaml --valut-password-file .myvault 
+ 1024  clear
+ 1025  mv .myvault /root
+ 1026  ll
+ 1027  ansible-playbook site.yaml --valut-password-file ~/.myvault 
+ 1028  ansible-playbook site.yaml --vault-password-file ~/.myvault 
+ 1029  clear
+ 1030  history 20 > site.txt

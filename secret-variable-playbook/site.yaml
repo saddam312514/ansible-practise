@@ -1,0 +1,10 @@
+---
+- name: Using secret in playbook
+  hosts: nodes
+  vars_files:
+    - user-passwd.yaml
+  tasks:
+  - name: Create user
+    user:
+      name: "{{ username }}"
+      password: "{{ passwd | password_hash('sha256') }}"
