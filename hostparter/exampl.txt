@@ -1,0 +1,5 @@
+ 1283  cp inventory ansible.cfg fresh.yml paralleslis-fork/
+ 1284  mkdir hostparter
+ 1285  ansible-playbook fresh.yml --limit 192.168.1.13
+ 1286  ansible-playbook fresh.yml --limit 192.168.1.11
+ 1287  history 5 > hostparter/exampl.txt
