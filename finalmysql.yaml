@@ -1,0 +1,35 @@
+---
+- name: install  DB server    
+  hosts: db   
+  tasks: 
+   
+  - name: make directory in opt     
+    file: 
+      path: /mnt/mysql       
+      state: directory
+      group: root
+      owner: root  
+      mode: u=rwx,g+wx,o+rwx
+
+  - name: Copy the file from master to node1
+    copy: src=/root/playbook/mysql80-community-release-el7-7.noarch.rpm dest=/mnt/mysql
+    when: "{{ inventory_hostname == '192.168.1.13' }}"
+
+  - name: Install MySQL 5.7 repo     
+    yum:  
+      name: /mnt/mysql/mysql80-community-release-el7-7.noarch.rpm
+      state: latest 
+       
+ 
+  - name: Install MySQL 5.7     
+    yum: 
+      name: mysql-community-server     
+      state: latest 
+      disable_gpg_check: yes  
+ 
+  - name: Start the MySQL service     
+    service:  
+      name: mysqld        
+      state: started        
+      enabled: true
+...

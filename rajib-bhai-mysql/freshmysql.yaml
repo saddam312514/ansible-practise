@@ -1,0 +1,64 @@
+
+
+- name: setup Mysql with db and remote login
+  hosts: webservers
+  gather_facts: no
+  tasks:
+    - name: Install MySQL 8.0 repo
+      yum: 
+        name: https://dev.mysql.com/get/mysql80-community-release-el7-7.noarch.rpm 
+        state: present
+
+    - name: Install MySQL 8.0
+      yum: 
+        name: "{{ packages }}"
+        state: present
+      vars:
+        packages:
+          - mysql-community-server
+          - mysql-community-client
+          - MySQL-python
+
+    - name: Start the MySQL service
+      service: 
+        name=mysqld 
+        state=started 
+        enabled=true
+
+    - name: Change mysql root password and keep track in
+      shell: |
+        password_match=`awk '/A temporary password is generated for/ {a=$0} END{ print a }' /var/log/mysqld.log | awk '{print $(NF)}'`
+        echo $password_match
+        mysql -uroot -p$password_match --connect-expired-password -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '{{ db_pass }}'; flush privileges; "
+        echo "[client]"
+        user=root
+        password="{{ db_pass }}" > /root/.my.cnf
+      args:
+        creates: /root/.my.cnf
+      register: change_temp_pass
+      notify: restart mysqld
+
+    - meta: flush_handlers
+    - debug:
+        var: change_temp_pass
+
+    - name: set mysql host '%' for remote previledge
+      shell: |
+        pass='{{ db_pass }}'
+        mysql -uroot -p$pass -e "CREATE USER 'root'@'%' IDENTIFIED BY '{{ db_pass }}'; GRANT ALL PRIVILEGES ON . TO 'root'@'%' WITH GRANT OPTION; flush privileges; "
+
+
+    - name: Enable remote login to mysql
+      lineinfile:
+         path: /etc/my.cnf
+         regexp: '^bind-address'
+         line: 'bind-address = 0.0.0.0'
+         backup: yes
+      notify:
+         - restart mysqld
+ 
+  handlers:
+    - name: restart mysqld
+      service: 
+        name: mysqld 
+        state: restarted

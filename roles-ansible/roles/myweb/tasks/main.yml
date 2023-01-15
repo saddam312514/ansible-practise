@@ -1,0 +1,10 @@
+
+- name: set mysql root pass
+  mysql_user:
+      login_user: root
+      login_password: "{{ msi_mysql_root_pass }}"
+      user: root
+      host_all: yes
+      password: "{{ msi_new_mysql_root_pass }}"
+
+

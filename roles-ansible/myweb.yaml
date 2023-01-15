@@ -1,0 +1,8 @@
+
+---
+- hosts: db
+  roles:
+      - { role: myweb, 
+          msi_new_mysql_root_pass: 'Choya@1234' 
+        }
+

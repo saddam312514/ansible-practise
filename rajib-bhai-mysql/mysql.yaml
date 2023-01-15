@@ -1,0 +1,46 @@
+
+- name: setup Mysql with db and remote login
+  hosts: db
+  gather_facts: no
+  vars:
+  vars_files:
+    - vars.yaml
+  tasks:
+    - name: Change mysql root password and keep track in
+      shell: |
+        password_match=`awk '/A temporary password is generated for/ {a=$0} END{ print a }' /var/log/mysqld.log | awk '{print $(NF)}'`
+        echo $password_match
+        mysql -uroot -p$password_match --connect-expired-password -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '{{ db_pass }}'; flush privileges; "
+        echo "[client]"
+        user=root
+        password="{{ db_pass }}" > /root/.my.cnf
+      args:
+        creates: /root/.my.cnf
+      register: change_temp_pass
+      notify: restart mysqld
+
+    - meta: flush_handlers
+    - debug:
+        var: change_temp_pass
+
+    - name: set mysql host '%' for remote previledge
+      shell: |
+        pass='{{ db_pass }}'
+        mysql -uroot -p$pass -e "CREATE USER 'rahat'@'172.25.81.101' IDENTIFIED WITH mysql_native_password BY '{{ db_pass }}'; ALTER USER 'rahat'@'172.25.81.101' IDENTIFIED WITH mysql_native_password BY '{{ db_pass }}'; GRANT CREATE, ALTER, DROP, INSERT, UPDATE, DELETE, SELECT, REFERENCES, RELOAD on *.* TO 'rahat'@'172.25.81.101' WITH GRANT OPTION; FLUSH PRIVILEGES; "
+
+
+    - name: Enable remote login to mysql
+      lineinfile:
+         path: /etc/my.cnf
+         regexp: '^bind-address'
+         line: 'bind-address = 0.0.0.0'
+         backup: yes
+      notify:
+         - restart mysqld
+ 
+  handlers:
+    - name: restart mysqld
+      service: 
+        name: mysqld 
+        state: restarted
+
