@@ -1,0 +1,51 @@
+- name: setup Mysql with db and remote login
+  hosts: db
+  vars:
+    install_package: false
+  vars_files:
+    - vars.yaml
+
+  tasks:
+    - name: install mysql package
+      yum:
+        name: mysql-server
+        state: latest
+    - name: create user
+      mysql_user:
+        check_implicit_admin: true
+        login_user: root
+        name: root
+        priv: '*.*:ALL,GRANT'
+        host: "{{ item }}"
+        password: password
+      with_items:
+        - 127.0.0.1
+        - ::1
+        - localhost
+
+
+    - name: create db
+      mysql_db:
+        name: db
+        state: present
+    - name: set mysql host '%' for remote previledge
+      shell: |
+        pass='{{ db_pass }}'
+        mysql -uroot -p$pass -e "CREATE USER 'saddam'@'%' IDENTIFIED WITH mysql_native_password BY '{{ user_pass }}'; ALTER USER 'saddam'@'%' IDENTIFIED WITH mysql_native_password BY '{{ user_pass }}'; GRANT CREATE, ALTER, DROP, INSERT, UPDATE, DELETE, SELECT, REFERENCES, RELOAD on *.* TO 'saddam'@'%' WITH GRANT OPTION; FLUSH PRIVILEGES; "
+      when: install_package
+    - name: Enable remote login to mysql
+      lineinfile:
+         path: /etc/mysql/mysql.conf.d/mysqld.cnf
+         #regexp: '^bind-address'
+         insertafter: '^# localhost which is more compatible and is not less secure.'
+         line: bind-address            = 0.0.0.0
+         backup: yes
+      notify:
+         - restart mysqld
+
+  handlers:
+    - name: restart mysqld
+      service:
+        name: mysql
+        state: restarted
+        enabled: yes
