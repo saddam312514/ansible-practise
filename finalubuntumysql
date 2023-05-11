@@ -7,9 +7,13 @@
 
   tasks:
     - name: install mysql package
-      yum:
-        name: mysql-server
+      apt:
+        name: "{{ item }}"
         state: latest
+      loop:
+        - mysql-server
+        - mysql-client
+        - python3
     - name: create user
       mysql_user:
         check_implicit_admin: true
@@ -22,12 +26,17 @@
         - 127.0.0.1
         - ::1
         - localhost
+      when: install_package
 
-
+    - name: Create DB root user
+      template:
+        src: mysql.cnf.j2
+        dest: /root/.my.cnf
     - name: create db
       mysql_db:
         name: db
         state: present
+
     - name: set mysql host '%' for remote previledge
       shell: |
         pass='{{ db_pass }}'
